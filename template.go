@@ -230,6 +230,7 @@ type MessageField struct {
 	Type         string `json:"type"`
 	LongType     string `json:"longType"`
 	FullType     string `json:"fullType"`
+	Number       int    `json:"number"`
 	IsMap        bool   `json:"ismap"`
 	IsOneof      bool   `json:"isoneof"`
 	OneofDecl    string `json:"oneofdecl"`
@@ -481,6 +482,7 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		FullType:     ft,
 		DefaultValue: pf.GetDefaultValue(),
 		Options:      mergeOptions(extractOptions(pf.GetOptions()), extensions.Transform(pf.OptionExtensions)),
+		Number:       int(pf.GetNumber()),
 		IsOneof:      pf.OneofIndex != nil,
 	}
 
