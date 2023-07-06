@@ -501,6 +501,7 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		strings.HasSuffix(m.LongType, "Entry") &&
 		strings.HasSuffix(m.FullType, "Entry") {
 		m.IsMap = true
+		m.Label = ""
 	}
 
 	return m
