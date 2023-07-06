@@ -175,6 +175,7 @@ type Message struct {
 	HasExtensions bool `json:"hasExtensions"`
 	HasFields     bool `json:"hasFields"`
 	HasOneofs     bool `json:"hasOneofs"`
+	IsMap         bool `json:"isMap"`
 
 	Extensions []*MessageExtension `json:"extensions"`
 	Fields     []*MessageField     `json:"fields"`
@@ -445,6 +446,7 @@ func parseMessage(pm *protokit.Descriptor) *Message {
 		HasExtensions: len(pm.GetExtensions()) > 0,
 		HasFields:     len(pm.GetMessageFields()) > 0,
 		HasOneofs:     len(pm.GetOneofDecl()) > 0,
+		IsMap:         pm.GetOptions().GetMapEntry(),
 		Extensions:    make([]*MessageExtension, 0, len(pm.Extensions)),
 		Fields:        make([]*MessageField, 0, len(pm.Fields)),
 		Options:       mergeOptions(extractOptions(pm.GetOptions()), extensions.Transform(pm.OptionExtensions)),
@@ -483,22 +485,12 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		DefaultValue: pf.GetDefaultValue(),
 		Options:      mergeOptions(extractOptions(pf.GetOptions()), extensions.Transform(pf.OptionExtensions)),
 		Number:       int(pf.GetNumber()),
+		IsMap:        pf.Message.GetOptions().GetMapEntry(),
 		IsOneof:      pf.OneofIndex != nil,
 	}
 
 	if m.IsOneof {
 		m.OneofDecl = oneofDecls[pf.GetOneofIndex()].GetName()
-	}
-
-	// Check if this is a map.
-	// See https://github.com/golang/protobuf/blob/master/protoc-gen-go/descriptor/descriptor.pb.go#L1556
-	// for more information
-	if m.Label == "repeated" &&
-		strings.Contains(m.LongType, ".") &&
-		strings.HasSuffix(m.Type, "Entry") &&
-		strings.HasSuffix(m.LongType, "Entry") &&
-		strings.HasSuffix(m.FullType, "Entry") {
-		m.IsMap = true
 	}
 
 	return m
