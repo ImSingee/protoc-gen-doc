@@ -1,6 +1,7 @@
 package gendoc_test
 
 import (
+	gendoc "github.com/ImSingee/protoc-gen-doc"
 	"regexp"
 	"testing"
 
@@ -22,10 +23,10 @@ func TestParseOptionsForBuiltinTemplates(t *testing.T) {
 		req := new(plugin_go.CodeGeneratorRequest)
 		req.Parameter = proto.String(kind + "," + file)
 
-		options, err := ParseOptions(req)
+		options, err := gendoc.ParseOptions(req)
 		require.NoError(t, err)
 
-		renderType, err := NewRenderType(kind)
+		renderType, err := gendoc.NewRenderType(kind)
 		require.NoError(t, err)
 
 		require.Equal(t, renderType, options.Type)
@@ -37,17 +38,17 @@ func TestParseOptionsForBuiltinTemplates(t *testing.T) {
 func TestParseOptionsForSourceRelative(t *testing.T) {
 	req := new(plugin_go.CodeGeneratorRequest)
 	req.Parameter = proto.String("markdown,index.md,source_relative")
-	options, err := ParseOptions(req)
+	options, err := gendoc.ParseOptions(req)
 	require.NoError(t, err)
 	require.Equal(t, options.SourceRelative, true)
 
 	req.Parameter = proto.String("markdown,index.md,default")
-	options, err = ParseOptions(req)
+	options, err = gendoc.ParseOptions(req)
 	require.NoError(t, err)
 	require.Equal(t, options.SourceRelative, false)
 
 	req.Parameter = proto.String("markdown,index.md")
-	options, err = ParseOptions(req)
+	options, err = gendoc.ParseOptions(req)
 	require.NoError(t, err)
 	require.Equal(t, options.SourceRelative, false)
 }
@@ -56,10 +57,10 @@ func TestParseOptionsForCustomTemplate(t *testing.T) {
 	req := new(plugin_go.CodeGeneratorRequest)
 	req.Parameter = proto.String("/path/to/template.tmpl,/base/name/only/output.md")
 
-	options, err := ParseOptions(req)
+	options, err := gendoc.ParseOptions(req)
 	require.NoError(t, err)
 
-	require.Equal(t, RenderTypeHTML, options.Type)
+	require.Equal(t, gendoc.RenderTypeHTML, options.Type)
 	require.Equal(t, "/path/to/template.tmpl", options.TemplateFile)
 	require.Equal(t, "output.md", options.OutputFile)
 }
@@ -68,7 +69,7 @@ func TestParseOptionsForExcludePatterns(t *testing.T) {
 	req := new(plugin_go.CodeGeneratorRequest)
 	req.Parameter = proto.String(":google/*,notgoogle/*")
 
-	options, err := ParseOptions(req)
+	options, err := gendoc.ParseOptions(req)
 	require.NoError(t, err)
 	require.Len(t, options.ExcludePatterns, 2)
 
@@ -91,7 +92,7 @@ func TestParseOptionsWithInvalidValues(t *testing.T) {
 		req := new(plugin_go.CodeGeneratorRequest)
 		req.Parameter = proto.String(value)
 
-		_, err := ParseOptions(req)
+		_, err := gendoc.ParseOptions(req)
 		require.Error(t, err)
 	}
 }
@@ -101,7 +102,7 @@ func TestRunPluginForBuiltinTemplate(t *testing.T) {
 	req := utils.CreateGenRequest(set, "Booking.proto", "Vehicle.proto", "nested/Book.proto")
 	req.Parameter = proto.String("markdown,/base/name/only/output.md")
 
-	plugin := new(Plugin)
+	plugin := new(gendoc.Plugin)
 	resp, err := plugin.Generate(req)
 	require.NoError(t, err)
 	require.Len(t, resp.File, 1)
@@ -114,7 +115,7 @@ func TestRunPluginForCustomTemplate(t *testing.T) {
 	req := utils.CreateGenRequest(set, "Booking.proto", "Vehicle.proto", "nested/Book.proto")
 	req.Parameter = proto.String("resources/html.tmpl,/base/name/only/output.html")
 
-	plugin := new(Plugin)
+	plugin := new(gendoc.Plugin)
 	resp, err := plugin.Generate(req)
 	require.NoError(t, err)
 	require.Len(t, resp.File, 1)
@@ -126,7 +127,7 @@ func TestRunPluginWithInvalidOptions(t *testing.T) {
 	req := new(plugin_go.CodeGeneratorRequest)
 	req.Parameter = proto.String("html")
 
-	plugin := new(Plugin)
+	plugin := new(gendoc.Plugin)
 	_, err := plugin.Generate(req)
 	require.Error(t, err)
 }
@@ -136,7 +137,7 @@ func TestRunPluginForSourceRelative(t *testing.T) {
 	req := utils.CreateGenRequest(set, "Booking.proto", "Vehicle.proto", "nested/Book.proto")
 	req.Parameter = proto.String("markdown,index.md,source_relative")
 
-	plugin := new(Plugin)
+	plugin := new(gendoc.Plugin)
 	resp, err := plugin.Generate(req)
 	require.NoError(t, err)
 	require.Len(t, resp.File, 2)

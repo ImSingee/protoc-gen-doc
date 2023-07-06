@@ -1,6 +1,7 @@
 package gendoc_test
 
 import (
+	gendoc "github.com/ImSingee/protoc-gen-doc"
 	"os"
 	"testing"
 
@@ -13,12 +14,12 @@ import (
 )
 
 var (
-	template    *Template
-	bookingFile *File
-	vehicleFile *File
+	template    *gendoc.Template
+	bookingFile *gendoc.File
+	vehicleFile *gendoc.File
 
-	cookieTemplate *Template
-	cookieFile     *File
+	cookieTemplate *gendoc.Template
+	cookieFile     *gendoc.File
 )
 
 func TestMain(m *testing.M) {
@@ -28,14 +29,14 @@ func TestMain(m *testing.M) {
 	req := utils.CreateGenRequest(set, "Booking.proto", "Vehicle.proto")
 	result := protokit.ParseCodeGenRequest(req)
 
-	template = NewTemplate(result)
+	template = gendoc.NewTemplate(result)
 	bookingFile = template.Files[0]
 	vehicleFile = template.Files[1]
 
 	set, _ = utils.LoadDescriptorSet("fixtures", "cookie.pb")
 	req = utils.CreateGenRequest(set, "Cookie.proto")
 	result = protokit.ParseCodeGenRequest(req)
-	cookieTemplate = NewTemplate(result)
+	cookieTemplate = gendoc.NewTemplate(result)
 	cookieFile = cookieTemplate.Files[0]
 
 	os.Exit(m.Run())
@@ -147,7 +148,7 @@ func TestFileEnumProperties(t *testing.T) {
 	require.Equal(t, "A flag for the status result.", enum.Description)
 	require.Len(t, enum.Values, 2)
 
-	expectedValues := []*EnumValue{
+	expectedValues := []*gendoc.EnumValue{
 		{Name: "OK", Number: "200", Description: "OK result."},
 		{Name: "BAD_REQUEST", Number: "400", Description: "BAD result."},
 	}
@@ -435,7 +436,7 @@ func TestExcludedComments(t *testing.T) {
 	require.Equal(t, "the id of this message.", findField("id", message).Description)
 }
 
-func findService(name string, f *File) *Service {
+func findService(name string, f *gendoc.File) *gendoc.Service {
 	for _, s := range f.Services {
 		if s.Name == name {
 			return s
@@ -445,7 +446,7 @@ func findService(name string, f *File) *Service {
 	return nil
 }
 
-func findServiceMethod(name string, s *Service) *ServiceMethod {
+func findServiceMethod(name string, s *gendoc.Service) *gendoc.ServiceMethod {
 	for _, m := range s.Methods {
 		if m.Name == name {
 			return m
@@ -455,7 +456,7 @@ func findServiceMethod(name string, s *Service) *ServiceMethod {
 	return nil
 }
 
-func findEnum(name string, f *File) *Enum {
+func findEnum(name string, f *gendoc.File) *gendoc.Enum {
 	for _, enum := range f.Enums {
 		if enum.LongName == name {
 			return enum
@@ -465,7 +466,7 @@ func findEnum(name string, f *File) *Enum {
 	return nil
 }
 
-func findExtension(name string, f *File) *FileExtension {
+func findExtension(name string, f *gendoc.File) *gendoc.FileExtension {
 	for _, ext := range f.Extensions {
 		if ext.LongName == name {
 			return ext
@@ -475,7 +476,7 @@ func findExtension(name string, f *File) *FileExtension {
 	return nil
 }
 
-func findMessage(name string, f *File) *Message {
+func findMessage(name string, f *gendoc.File) *gendoc.Message {
 	for _, m := range f.Messages {
 		if m.LongName == name {
 			return m
@@ -485,7 +486,7 @@ func findMessage(name string, f *File) *Message {
 	return nil
 }
 
-func findField(name string, m *Message) *MessageField {
+func findField(name string, m *gendoc.Message) *gendoc.MessageField {
 	for _, f := range m.Fields {
 		if f.Name == name {
 			return f
