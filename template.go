@@ -235,6 +235,7 @@ type MessageField struct {
 	IsMap        bool   `json:"ismap"`
 	IsOneof      bool   `json:"isoneof"`
 	OneofDecl    string `json:"oneofdecl"`
+	Deprecated   bool   `json:"deprecated"`
 	DefaultValue string `json:"defaultValue"`
 
 	Options map[string]interface{} `json:"options,omitempty"`
@@ -487,6 +488,7 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		Number:       int(pf.GetNumber()),
 		IsMap:        pf.Message.GetOptions().GetMapEntry(),
 		IsOneof:      pf.OneofIndex != nil,
+		Deprecated:   pf.GetOptions().GetDeprecated(),
 	}
 
 	if m.IsOneof {
