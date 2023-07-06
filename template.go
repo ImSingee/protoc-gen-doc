@@ -486,13 +486,21 @@ func parseMessageField(pf *protokit.FieldDescriptor, oneofDecls []*descriptor.On
 		DefaultValue: pf.GetDefaultValue(),
 		Options:      mergeOptions(extractOptions(pf.GetOptions()), extensions.Transform(pf.OptionExtensions)),
 		Number:       int(pf.GetNumber()),
-		IsMap:        pf.Message.GetOptions().GetMapEntry(),
 		IsOneof:      pf.OneofIndex != nil,
 		Deprecated:   pf.GetOptions().GetDeprecated(),
 	}
 
 	if m.IsOneof {
 		m.OneofDecl = oneofDecls[pf.GetOneofIndex()].GetName()
+	}
+
+	// Check if this is a map.
+	if m.Label == "repeated" &&
+		strings.Contains(m.LongType, ".") &&
+		strings.HasSuffix(m.Type, "Entry") &&
+		strings.HasSuffix(m.LongType, "Entry") &&
+		strings.HasSuffix(m.FullType, "Entry") {
+		m.IsMap = true
 	}
 
 	return m
